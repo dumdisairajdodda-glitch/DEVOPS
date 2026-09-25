@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block page_title %}Analytics & Overview{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+  <div>
+    <h3 class="fw-bold mb-1">Welcome back, {{ current_user.full_name if current_user else 'Admin' }}!</h3>
+    <p class="text-muted mb-0 small">Real-time HR analytics and team management metrics.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('employees.create') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3">
+      <i class="bi bi-plus-lg"></i>
+      <span>Add Employee</span>
+    </a>
+    <a href="{{ url_for('departments.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 px-3">
+      <i class="bi bi-building-add"></i>
+      <span>Manage Departments</span>
+    </a>
+  </div>
+</div>
+
+<!-- 4 KPI Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card" style="--stat-accent: #4f46e5;">
+      <div>
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-value">{{ stats.total_employees }}</div>
+        <small class="text-muted"><i class="bi bi-arrow-up-right text-success me-1"></i>All registered staff</small>
+      </div>
+      <div class="stat-icon bg-primary-subtle text-primary">
+        <i class="bi bi-people-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card" style="--stat-accent: #10b981;">
+      <div>
+        <div class="stat-label">Active Staff</div>
+        <div class="stat-value text-success">{{ stats.active_employees }}</div>
+        <small class="text-muted">Working on projects</small>
+      </div>
+      <div class="stat-icon bg-success-subtle text-success">
+        <i class="bi bi-person-check-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card" style="--stat-accent: #ef4444;">
+      <div>
+        <div class="stat-label">Inactive / On Leave</div>
+        <div class="stat-value text-danger">{{ stats.inactive_employees + stats.on_leave_employees }}</div>
+        <small class="text-muted">{{ stats.inactive_employees }} inactive, {{ stats.on_leave_employees }} on leave</small>
+      </div>
+      <div class="stat-icon bg-danger-subtle text-danger">
+        <i class="bi bi-person-x-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card" style="--stat-accent: #06b6d4;">
+      <div>
+        <div class="stat-label">Total Departments</div>
+        <div class="stat-value text-info">{{ stats.total_departments }}</div>
+        <small class="text-muted">Operational units</small>
+      </div>
+      <div class="stat-icon bg-info-subtle text-info">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payroll Highlight Card -->
+<div class="card-saas p-3 mb-4 bg-white d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="p-3 rounded-3 bg-indigo-subtle text-primary" style="background-color: #eef2ff;">
+      <i class="bi bi-cash-stack fs-4"></i>
+    </div>
+    <div>
+      <div class="text-muted small fw-bold text-uppercase">Monthly Payroll Estimate (Active Staff)</div>
+      <div class="fs-4 fw-bold text-dark">${{ "{:,.2f}".format(stats.total_monthly_payroll) }}</div>
+    </div>
+  </div>
+  <div class="text-muted small">
+    Calculated in real-time from active employee database contracts
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="card-saas p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0">Department Headcount</h5>
+        <span class="badge bg-light text-muted border">Live Database</span>
+      </div>
+      <div style="height: 280px; position: relative;">
+        <canvas id="deptChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-saas p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0">Employment Status</h5>
+        <span class="badge bg-light text-muted border">Ratio</span>
+      </div>
+      <div style="height: 280px; position: relative;" class="d-flex align-items-center justify-content-center">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Employees Table -->
+<div class="card-saas">
+  <div class="p-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+    <div>
+      <h5 class="fw-bold mb-0">Recently Added Employees</h5>
+      <small class="text-muted">Latest workforce additions in MySQL</small>
+    </div>
+    <a href="{{ url_for('employees.index') }}" class="btn btn-outline-primary btn-sm px-3">
+      View All Employees <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-saas">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>ID</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Status</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if stats.recent_employees %}
+          {% for emp in stats.recent_employees %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar-initials" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                    {{ emp.first_name[:1] }}{{ emp.last_name[:1] }}
+                  </div>
+                  <div>
+                    <a href="{{ url_for('employees.detail', id=emp.id) }}" class="fw-bold text-dark text-decoration-none">
+                      {{ emp.full_name }}
+                    </a>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ emp.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge bg-light text-dark border">{{ emp.employee_id }}</span></td>
+              <td><span class="badge bg-primary-subtle text-primary">{{ emp.department_name }}</span></td>
+              <td>{{ emp.designation }}</td>
+              <td>
+                {% if emp.status == 'Active' %}
+                  <span class="badge-status badge-active">Active</span>
+                {% elif emp.status == 'Inactive' %}
+                  <span class="badge-status badge-inactive">Inactive</span>
+                {% else %}
+                  <span class="badge-status badge-leave">{{ emp.status }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('employees.detail', id=emp.id) }}" class="btn-action" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-1"></i>
+              No employees added yet. Click "+ Add Employee" to get started!
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Real database metrics data injected by Flask
+  const deptLabels = {{ stats.department_distribution | map(attribute='name') | list | tojson }};
+  const deptCounts = {{ stats.department_distribution | map(attribute='count') | list | tojson }};
+
+  // Department Bar Chart
+  const deptCtx = document.getElementById('deptChart');
+  if (deptCtx) {
+    new Chart(deptCtx, {
+      type: 'bar',
+      data: {
+        labels: deptLabels.length ? deptLabels : ['Engineering', 'Human Resources', 'Sales', 'Finance'],
+        datasets: [{
+          label: 'Employees',
+          data: deptCounts.length ? deptCounts : [0, 0, 0, 0],
+          backgroundColor: '#4f46e5',
+          borderRadius: 6,
+          barThickness: 28
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  // Status Ratio Donut Chart
+  const statusCtx = document.getElementById('statusChart');
+  if (statusCtx) {
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Active', 'Inactive', 'On Leave'],
+        datasets: [{
+          data: [
+            {{ stats.status_distribution['Active'] }},
+            {{ stats.status_distribution['Inactive'] }},
+            {{ stats.status_distribution['On Leave'] }}
+          ],
+          backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              padding: 15
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

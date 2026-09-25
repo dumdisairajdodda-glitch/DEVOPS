@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ 'Edit Employee' if is_edit else 'Add New Employee' }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('employees.index') }}" class="text-muted text-decoration-none small d-inline-flex align-items-center gap-1 mb-2">
+    <i class="bi bi-arrow-left"></i> Back to Directory
+  </a>
+  <h3 class="fw-bold mb-1">{{ 'Edit Employee Profile' if is_edit else 'Add New Employee' }}</h3>
+  <p class="text-muted small mb-0">{{ 'Update profile and contract details for this employee.' if is_edit else 'Enter the personal and job information to register a new employee.' }}</p>
+</div>
+
+<div class="card-saas p-4">
+  <form method="POST" action="" class="form-saas">
+    <div class="row g-4">
+      
+      <!-- Left Column: Personal Information -->
+      <div class="col-lg-6">
+        <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+          <i class="bi bi-person-badge"></i> Personal Details
+        </h5>
+
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form_data.first_name or '' }}" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form_data.last_name or '' }}" required>
+          </div>
+
+          <div class="col-12">
+            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email or '' }}" placeholder="name@company.com" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" id="phone" name="phone" value="{{ form_data.phone or '' }}" placeholder="+1 555-0199" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+            <select class="form-select" id="gender" name="gender" required>
+              <option value="">Select Gender</option>
+              <option value="Male" {% if form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+              <option value="Other" {% if form_data.gender == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label for="address" class="form-label">Residential Address</label>
+            <textarea class="form-control" id="address" name="address" rows="3" placeholder="Street address, city, state, postal code">{{ form_data.address or '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Employment Details -->
+      <div class="col-lg-6">
+        <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+          <i class="bi bi-briefcase"></i> Employment Contract
+        </h5>
+
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label for="employee_id" class="form-label">Employee ID <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{ form_data.employee_id or '' }}" placeholder="EMP-1001" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="department_id" class="form-label">Department <span class="text-danger">*</span></label>
+            <select class="form-select" id="department_id" name="department_id" required>
+              <option value="">Select Department</option>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}" {% if form_data.department_id|string == dept.id|string %}selected{% endif %}>
+                  {{ dept.name }} ({{ dept.code }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label for="designation" class="form-label">Designation / Job Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="designation" name="designation" value="{{ form_data.designation or '' }}" placeholder="e.g. Senior DevOps Engineer" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="salary" class="form-label">Monthly Salary ($) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" class="form-control" id="salary" name="salary" value="{{ form_data.salary or '' }}" placeholder="6500.00" required>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="joining_date" class="form-label">Joining Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="joining_date" name="joining_date" value="{{ form_data.joining_date or '' }}" required>
+          </div>
+
+          <div class="col-12">
+            <label for="status" class="form-label">Employment Status <span class="text-danger">*</span></label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="Active" {% if form_data.status == 'Active' or not form_data.status %}selected{% endif %}>Active</option>
+              <option value="Inactive" {% if form_data.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+              <option value="On Leave" {% if form_data.status == 'On Leave' %}selected{% endif %}>On Leave</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex justify-content-end gap-2">
+      <a href="{{ url_for('employees.index') }}" class="btn btn-light px-4">Cancel</a>
+      <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+        <i class="bi bi-check2-circle me-1"></i> {{ 'Save Changes' if is_edit else 'Create Employee' }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

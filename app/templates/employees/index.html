@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block page_title %}Employees Directory{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+  <div>
+    <h3 class="fw-bold mb-1">Employee Directory</h3>
+    <p class="text-muted mb-0 small">Manage, filter, and review all team members in the system.</p>
+  </div>
+  <div>
+    <a href="{{ url_for('employees.create') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3">
+      <i class="bi bi-person-plus-fill"></i>
+      <span>Add New Employee</span>
+    </a>
+  </div>
+</div>
+
+<!-- Search & Filter Toolbar -->
+<div class="card-saas p-3 mb-4">
+  <form method="GET" action="{{ url_for('employees.index') }}" class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+        <input type="text" name="search" class="form-control border-start-0" placeholder="Search by name, ID, email, role..." value="{{ current_search }}">
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <select name="department_id" class="form-select form-select-sm">
+        <option value="">All Departments</option>
+        {% for dept in departments %}
+          <option value="{{ dept.id }}" {% if current_dept|string == dept.id|string %}selected{% endif %}>
+            {{ dept.name }} ({{ dept.code }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select name="status" class="form-select form-select-sm">
+        <option value="">All Statuses</option>
+        <option value="Active" {% if current_status == 'Active' %}selected{% endif %}>Active</option>
+        <option value="Inactive" {% if current_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+        <option value="On Leave" {% if current_status == 'On Leave' %}selected{% endif %}>On Leave</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+      <a href="{{ url_for('employees.index') }}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- Employees Table Card -->
+<div class="card-saas">
+  <div class="p-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+    <span class="text-muted small">Showing <strong>{{ employees|length }}</strong> employee(s)</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-saas">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>ID</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Salary</th>
+          <th>Joining Date</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if employees %}
+          {% for emp in employees %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar-initials">
+                    {{ emp.first_name[:1] }}{{ emp.last_name[:1] }}
+                  </div>
+                  <div>
+                    <a href="{{ url_for('employees.detail', id=emp.id) }}" class="fw-bold text-dark text-decoration-none">
+                      {{ emp.full_name }}
+                    </a>
+                    <div class="text-muted" style="font-size: 0.78rem;">{{ emp.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge bg-light text-dark border">{{ emp.employee_id }}</span></td>
+              <td>
+                <span class="badge bg-primary-subtle text-primary">
+                  {{ emp.department.name if emp.department else 'N/A' }}
+                </span>
+              </td>
+              <td>{{ emp.designation }}</td>
+              <td>${{ "{:,.2f}".format(emp.salary) }}</td>
+              <td>{{ emp.joining_date.strftime('%b %d, %Y') if emp.joining_date else '-' }}</td>
+              <td>
+                {% if emp.status == 'Active' %}
+                  <span class="badge-status badge-active">Active</span>
+                {% elif emp.status == 'Inactive' %}
+                  <span class="badge-status badge-inactive">Inactive</span>
+                {% else %}
+                  <span class="badge-status badge-leave">{{ emp.status }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex gap-1">
+                  <a href="{{ url_for('employees.detail', id=emp.id) }}" class="btn-action" title="View Profile">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="{{ url_for('employees.edit', id=emp.id) }}" class="btn-action" title="Edit Employee">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button type="button" class="btn-action btn-action-danger" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#deleteConfirmModal" 
+                          data-item-name="{{ emp.full_name }} ({{ emp.employee_id }})" 
+                          data-form-action="{{ url_for('employees.delete', id=emp.id) }}"
+                          title="Delete Employee">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <div class="text-muted mb-3">
+                <i class="bi bi-people" style="font-size: 2.5rem;"></i>
+              </div>
+              <h6 class="fw-bold">No employees found</h6>
+              <p class="text-muted small mb-3">Try adjusting your search filters or add a new team member.</p>
+              <a href="{{ url_for('employees.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> Add Employee
+              </a>
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block page_title %}Server Error{% endblock %}
+{% block content %}
+<div class="card-saas text-center py-5 my-4">
+  <div class="text-warning mb-3">
+    <i class="bi bi-exclamation-triangle" style="font-size: 3.5rem;"></i>
+  </div>
+  <h2 class="fw-bold mb-2">500 - Internal Server Error</h2>
+  <p class="text-muted mb-4">Something went wrong on our end. Please verify database connectivity or try again shortly.</p>
+  <div>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary btn-sm px-4">
+      <i class="bi bi-arrow-repeat me-1"></i> Try Again
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ employee.full_name }} - Profile{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('employees.index') }}" class="text-muted text-decoration-none small d-inline-flex align-items-center gap-1 mb-2">
+    <i class="bi bi-arrow-left"></i> Back to Employee Directory
+  </a>
+</div>
+
+<!-- Profile Banner Card -->
+<div class="card-saas p-4 mb-4">
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="avatar-initials" style="width: 64px; height: 64px; font-size: 1.5rem;">
+        {{ employee.first_name[:1] }}{{ employee.last_name[:1] }}
+      </div>
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h3 class="fw-bold mb-0">{{ employee.full_name }}</h3>
+          {% if employee.status == 'Active' %}
+            <span class="badge-status badge-active">Active</span>
+          {% elif employee.status == 'Inactive' %}
+            <span class="badge-status badge-inactive">Inactive</span>
+          {% else %}
+            <span class="badge-status badge-leave">{{ employee.status }}</span>
+          {% endif %}
+        </div>
+        <p class="text-muted mb-0">{{ employee.designation }} • <span class="text-primary fw-semibold">{{ employee.department.name }}</span></p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('employees.edit', id=employee.id) }}" class="btn btn-outline-primary btn-sm px-3">
+        <i class="bi bi-pencil me-1"></i> Edit Profile
+      </a>
+      <button type="button" class="btn btn-outline-danger btn-sm px-3" 
+              data-bs-toggle="modal" 
+              data-bs-target="#deleteConfirmModal" 
+              data-item-name="{{ employee.full_name }} ({{ employee.employee_id }})" 
+              data-form-action="{{ url_for('employees.delete', id=employee.id) }}">
+        <i class="bi bi-trash3 me-1"></i> Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Personal Information -->
+  <div class="col-lg-6">
+    <div class="card-saas p-4 h-100">
+      <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 text-primary">
+        <i class="bi bi-person-lines-fill"></i> Personal Information
+      </h5>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">First Name</span>
+          <span class="fw-semibold">{{ employee.first_name }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Last Name</span>
+          <span class="fw-semibold">{{ employee.last_name }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Email</span>
+          <span class="fw-semibold text-primary">{{ employee.email }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Phone</span>
+          <span class="fw-semibold">{{ employee.phone }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Gender</span>
+          <span class="fw-semibold">{{ employee.gender }}</span>
+        </li>
+        <li class="list-group-item px-0">
+          <span class="text-muted d-block mb-1">Residential Address</span>
+          <span class="fw-semibold">{{ employee.address or 'No address provided' }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Job & Contract Information -->
+  <div class="col-lg-6">
+    <div class="card-saas p-4 h-100">
+      <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 text-primary">
+        <i class="bi bi-briefcase-fill"></i> Employment Contract
+      </h5>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Employee ID</span>
+          <span class="badge bg-light text-dark border">{{ employee.employee_id }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Department</span>
+          <span class="badge bg-primary-subtle text-primary">{{ employee.department.name }} ({{ employee.department.code }})</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Designation</span>
+          <span class="fw-semibold">{{ employee.designation }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Monthly Salary</span>
+          <span class="fw-bold text-success fs-6">${{ "{:,.2f}".format(employee.salary) }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">Joining Date</span>
+          <span class="fw-semibold">{{ employee.joining_date.strftime('%B %d, %Y') if employee.joining_date else '-' }}</span>
+        </li>
+        <li class="list-group-item px-0 d-flex justify-content-between">
+          <span class="text-muted">System Registered</span>
+          <span class="fw-semibold text-muted small">{{ employee.created_at.strftime('%Y-%m-%d %H:%M') if employee.created_at else '-' }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

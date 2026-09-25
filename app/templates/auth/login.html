@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - {{ app_name }}</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-4 mb-3" style="background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; width: 56px; height: 56px;">
+        <i class="bi bi-people-fill fs-3"></i>
+      </div>
+      <h3 class="fw-bold mb-1 text-dark">{{ app_name }}</h3>
+      <p class="text-muted small mb-0">{{ app_tagline }}</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show small py-2 mb-3" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}" class="form-saas">
+      <div class="mb-3">
+        <label for="identifierInput" class="form-label">Username or Email</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-person"></i></span>
+          <input type="text" class="form-control border-start-0" id="identifierInput" name="identifier" placeholder="admin@employeehub.com" required autofocus>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="passwordInput" class="form-label">Password</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control border-start-0 border-end-0" id="passwordInput" name="password" placeholder="••••••••" required>
+          <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePasswordBtn">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+          <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm" style="background: linear-gradient(135deg, #4f46e5, #4338ca); border: none;">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Dashboard
+      </button>
+    </form>
+
+    <!-- Demo Credentials Helper -->
+    <div class="demo-account-box">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="fw-bold small text-dark"><i class="bi bi-key-fill text-warning me-1"></i> Demo Credentials</span>
+        <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Quick Autofill</span>
+      </div>
+      <div class="d-grid gap-2">
+        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('admin@employeehub.com', 'admin123')">
+          <span><strong class="text-primary">Admin:</strong> admin@employeehub.com</span>
+          <span class="badge bg-primary text-white">Fill</span>
+        </button>
+        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('hr@employeehub.com', 'hr123')">
+          <span><strong class="text-success">HR:</strong> hr@employeehub.com</span>
+          <span class="badge bg-success text-white">Fill</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
