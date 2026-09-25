@@ -40,7 +40,7 @@
         <label for="identifierInput" class="form-label">Username or Email</label>
         <div class="input-group">
           <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-person"></i></span>
-          <input type="text" class="form-control border-start-0" id="identifierInput" name="identifier" placeholder="admin@employeehub.com" required autofocus>
+          <input type="text" class="form-control border-start-0" id="identifierInput" name="identifier" placeholder="{{ demo_admin_email }}" required autofocus>
         </div>
       </div>
 
@@ -67,19 +67,19 @@
       </button>
     </form>
 
-    <!-- Demo Credentials Helper -->
+    <!-- Demo Credentials Helper (Read dynamically from .env) -->
     <div class="demo-account-box">
       <div class="d-flex align-items-center justify-content-between mb-2">
-        <span class="fw-bold small text-dark"><i class="bi bi-key-fill text-warning me-1"></i> Demo Credentials</span>
+        <span class="fw-bold small text-dark"><i class="bi bi-key-fill text-warning me-1"></i> Demo Credentials (.env)</span>
         <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Quick Autofill</span>
       </div>
       <div class="d-grid gap-2">
-        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('admin@employeehub.com', 'admin123')">
-          <span><strong class="text-primary">Admin:</strong> admin@employeehub.com</span>
+        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('{{ demo_admin_email }}', '{{ demo_admin_password }}')">
+          <span><strong class="text-primary">Admin:</strong> {{ demo_admin_email }}</span>
           <span class="badge bg-primary text-white">Fill</span>
         </button>
-        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('hr@employeehub.com', 'hr123')">
-          <span><strong class="text-success">HR:</strong> hr@employeehub.com</span>
+        <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center" onclick="fillCredentials('{{ demo_hr_email }}', '{{ demo_hr_password }}')">
+          <span><strong class="text-success">HR:</strong> {{ demo_hr_email }}</span>
           <span class="badge bg-success text-white">Fill</span>
         </button>
       </div>

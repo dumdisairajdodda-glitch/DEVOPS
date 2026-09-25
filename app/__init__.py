@@ -20,7 +20,7 @@ def create_app(config_name='development'):
     from app.models.department import Department
     from app.models.employee import Employee
     
-    # Context processor to inject user into all templates
+    # Context processor to inject user and .env demo credentials into all templates
     @app.before_request
     def load_logged_in_user():
         user_id = session.get('user_id')
@@ -34,7 +34,11 @@ def create_app(config_name='development'):
         return {
             'app_name': 'EmployeeHub',
             'app_tagline': 'Smart Employee Management',
-            'current_user': g.user
+            'current_user': g.user,
+            'demo_admin_email': app.config.get('DEFAULT_ADMIN_EMAIL', 'admin@employeehub.com'),
+            'demo_admin_password': app.config.get('DEFAULT_ADMIN_PASSWORD', 'admin123'),
+            'demo_hr_email': app.config.get('DEFAULT_HR_EMAIL', 'hr@employeehub.com'),
+            'demo_hr_password': app.config.get('DEFAULT_HR_PASSWORD', 'hr123'),
         }
     
     # Register Blueprints

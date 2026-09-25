@@ -1,7 +1,9 @@
 """
 Database Seeder for EmployeeHub.
 Creates initial Admin, HR users, Departments, and realistic sample Employees.
+Credentials are automatically loaded from .env.
 """
+import os
 from datetime import date, timedelta
 from app import create_app, db
 from app.models.user import User
@@ -14,32 +16,54 @@ def seed_all():
     # Create tables if not existing
     db.create_all()
 
-    # 1. Seed Users (Admin & HR)
-    if not User.query.filter_by(username='admin').first():
+    # Load credentials from environment
+    admin_name = os.environ.get('DEFAULT_ADMIN_NAME', 'System Administrator')
+    admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'admin')
+    admin_email = os.environ.get('DEFAULT_ADMIN_EMAIL', 'admin@employeehub.com')
+    admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'admin123')
+
+    hr_name = os.environ.get('DEFAULT_HR_NAME', 'Sarah Jenkins')
+    hr_username = os.environ.get('DEFAULT_HR_USERNAME', 'hr_manager')
+    hr_email = os.environ.get('DEFAULT_HR_EMAIL', 'hr@employeehub.com')
+    hr_password = os.environ.get('DEFAULT_HR_PASSWORD', 'hr123')
+
+    # 1. Seed or Update Admin User
+    admin = User.query.filter((User.username == admin_username) | (User.email == admin_email)).first()
+    if not admin:
         admin = User(
-            username='admin',
-            email='admin@employeehub.com',
-            full_name='System Administrator',
+            username=admin_username,
+            email=admin_email,
+            full_name=admin_name,
             role='Admin'
         )
-        admin.set_password('admin123')
+        admin.set_password(admin_password)
         db.session.add(admin)
-        print("-> Created default Admin user: admin@employeehub.com / admin123")
+        print(f"-> Created Admin user from .env: {admin_email} / {admin_password}")
+    else:
+        admin.email = admin_email
+        admin.set_password(admin_password)
+        print(f"-> Updated Admin password from .env for: {admin_email}")
 
-    if not User.query.filter_by(username='hr_manager').first():
+    # 2. Seed or Update HR User
+    hr = User.query.filter((User.username == hr_username) | (User.email == hr_email)).first()
+    if not hr:
         hr = User(
-            username='hr_manager',
-            email='hr@employeehub.com',
-            full_name='Sarah Jenkins',
+            username=hr_username,
+            email=hr_email,
+            full_name=hr_name,
             role='HR'
         )
-        hr.set_password('hr123')
+        hr.set_password(hr_password)
         db.session.add(hr)
-        print("-> Created default HR user: hr@employeehub.com / hr123")
+        print(f"-> Created HR user from .env: {hr_email} / {hr_password}")
+    else:
+        hr.email = hr_email
+        hr.set_password(hr_password)
+        print(f"-> Updated HR password from .env for: {hr_email}")
 
     db.session.commit()
 
-    # 2. Seed Departments
+    # 3. Seed Departments
     dept_data = [
         {'name': 'Engineering', 'code': 'ENG', 'description': 'Cloud infrastructure, backend microservices, and software engineering.'},
         {'name': 'Human Resources', 'code': 'HR', 'description': 'Talent management, organizational development, and employee success.'},
@@ -62,7 +86,7 @@ def seed_all():
     db.session.commit()
     print("-> Departments seeded successfully.")
 
-    # 3. Seed Sample Employees
+    # 4. Seed Sample Employees
     if Employee.query.count() == 0:
         sample_employees = [
             {
