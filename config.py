@@ -39,8 +39,21 @@ class Config:
     elif DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-    # Fallback to local SQLite if USE_SQLITE is true
-    if os.environ.get('USE_SQLITE', 'false').lower() in ('true', '1', 'yes'):
+    # Database selection logic:
+    # 1. If USE_SQLITE is explicitly set, follow it.
+    # 2. If running on Render (RENDER=true) and no DATABASE_URL was provided, default to SQLite.
+    # 3. Otherwise use DATABASE_URL.
+    is_render = os.environ.get('RENDER', '').lower() == 'true'
+    raw_use_sqlite = os.environ.get('USE_SQLITE')
+    
+    if raw_use_sqlite is not None:
+        use_sqlite = raw_use_sqlite.lower() in ('true', '1', 'yes')
+    elif is_render and not os.environ.get('DATABASE_URL'):
+        use_sqlite = True
+    else:
+        use_sqlite = False
+
+    if use_sqlite:
         SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'employeehub.db')}"
     else:
         SQLALCHEMY_DATABASE_URI = DATABASE_URL

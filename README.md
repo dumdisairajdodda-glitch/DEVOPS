@@ -327,28 +327,60 @@ docker run -p 5000:5000 -e SECRET_KEY="mysecret" -e USE_SQLITE="true" employeehu
 
 ## 13. Render Cloud Deployment Guide
 
-Render allows free, zero-maintenance hosting for Python applications.
+Render provides free, zero-maintenance cloud hosting for Python applications. EmployeeHub is pre-configured for turnkey Render deployment.
 
-### Option A: Using `render.yaml` (Blueprint)
-1. Push this repository to GitHub.
-2. Log in to [Render Dashboard](https://dashboard.render.com).
-3. Click **New +** -> **Blueprint**.
-4. Connect your GitHub repository.
-5. Render reads `render.yaml` and provisions the Web Service and Managed Database automatically!
+### Option A: Turnkey Blueprint Deployment (Recommended)
+This method provisions both the **Web Service** and a **Render PostgreSQL Database** automatically using [render.yaml](file:///c:/Users/dumdi/Downloads/employee-management/render.yaml).
 
-### Option B: Manual Web Service Setup on Render
-1. Click **New +** -> **Web Service**.
-2. Select your repository.
-3. Configure the following settings:
+1. Push your repository to GitHub:
+   ```bash
+   git add .
+   git commit -m "feat: configure render deployment with postgres support"
+   git push origin main
+   ```
+2. Open the [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** > **Blueprint**.
+4. Connect your GitHub repository (`DEVOPS`).
+5. Render detects `render.yaml` and displays the deployment plan:
+   * **Web Service**: `employeehub` (Python 3.11, Gunicorn)
+   * **PostgreSQL Database**: `employeehub-db`
+6. Click **Apply**.
+7. Render automatically:
+   * Builds the Python virtual environment and installs dependencies (including `psycopg2-binary`).
+   * Connects the Web Service to the PostgreSQL database via `DATABASE_URL`.
+   * Runs `python seed.py` to create tables, admin accounts, departments, and sample employees.
+   * Boots the production Gunicorn server.
+8. Your app will be live at `https://employeehub-xxxx.onrender.com`!
+
+---
+
+### Option B: Free SQLite Web Service (Zero Database Setup)
+If you want a 100% free web service without creating a database service:
+
+1. In Render Dashboard, click **New +** > **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the service:
    * **Name**: `employeehub`
    * **Language**: `Python 3`
    * **Build Command**: `pip install --upgrade pip && pip install -r requirements.txt`
-   * **Start Command**: `gunicorn run:app`
+   * **Start Command**: `python seed.py && gunicorn run:app`
 4. Add **Environment Variables**:
    * `FLASK_ENV`: `production`
-   * `SECRET_KEY`: (Click "Generate" or provide a secure key)
-   * `DATABASE_URL`: Your cloud MySQL or PostgreSQL connection string (or set `USE_SQLITE=true` for free tier testing)
-5. Click **Create Web Service**. Your app is live within minutes!
+   * `PYTHON_VERSION`: `3.11.9`
+   * `USE_SQLITE`: `true`
+   * `SECRET_KEY`: (Click "Generate" or enter a secret string)
+5. Click **Deploy Web Service**. The app creates a local SQLite database and seeds default accounts instantly.
+
+---
+
+### Default Credentials After Deployment
+
+| Role | Email | Password |
+|---|---|---|
+| **System Administrator** | `admin@employeehub.com` | `admin123` |
+| **HR Manager** | `hr@employeehub.com` | `hr123` |
+
+> *Tip: You can customize default credentials by setting `DEFAULT_ADMIN_EMAIL`, `DEFAULT_ADMIN_PASSWORD`, `DEFAULT_HR_EMAIL`, and `DEFAULT_HR_PASSWORD` in your Render Environment Variables!*
 
 ---
 

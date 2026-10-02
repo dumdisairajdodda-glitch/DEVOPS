@@ -13,6 +13,11 @@ def api_login_required(f):
     wrapper.__name__ = f.__name__
     return wrapper
 
+# Cloud Health Check Endpoint
+@api_bp.route('/health', methods=['GET'])
+def api_health():
+    return jsonify({'status': 'healthy', 'service': 'EmployeeHub'}), 200
+
 # Auth Endpoints
 @api_bp.route('/login', methods=['POST'])
 def api_login():

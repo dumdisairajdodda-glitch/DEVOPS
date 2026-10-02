@@ -187,6 +187,7 @@ def seed_all():
     print("Database seeding completed successfully!")
 
 if __name__ == '__main__':
-    app = create_app()
+    env_name = os.environ.get('FLASK_ENV', 'development')
+    app = create_app(env_name)
     with app.app_context():
         seed_all()
